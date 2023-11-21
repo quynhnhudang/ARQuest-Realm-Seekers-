@@ -1,0 +1,64 @@
+import pygame
+import random
+import math
+
+# Initialize Pygame
+pygame.init()
+
+# Constants
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+FPS = 60
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+VIRTUAL_OBJECT_RADIUS = 20
+CAPTURE_DISTANCE = 30
+
+# Game initialization
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("AR Game")
+clock = pygame.time.Clock()
+
+# Virtual objects
+virtual_objects = [{'id': 1, 'position': [100, 100]}, {'id': 2, 'position': [200, 300]}, {'id': 3, 'position': [400, 200]}]
+captured_objects = set()
+score = 0
+
+# Game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Update virtual objects
+    for obj in virtual_objects:
+        obj['position'][0] += random.uniform(-0.1, 0.1)
+        obj['position'][1] += random.uniform(-0.1, 0.1)
+
+    # Check for tap/click
+    mouse_pos = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+
+    if click[0] == 1:
+        for obj in virtual_objects:
+            distance = math.sqrt((mouse_pos[0] - obj['position'][0]) ** 2 + (mouse_pos[1] - obj['position'][1]) ** 2)
+            if distance < CAPTURE_DISTANCE and obj['id'] not in captured_objects:
+                captured_objects.add(obj['id'])
+                score += 1
+                print(f"Object {obj['id']} captured! Score: {score}")
+
+    # Draw everything
+    screen.fill(BLACK)
+
+    for obj in virtual_objects:
+        color = WHITE if obj['id'] not in captured_objects else BLACK
+        pygame.draw.circle(screen, color, (int(obj['position'][0]), int(obj['position'][1])), VIRTUAL_OBJECT_RADIUS)
+
+    pygame.display.flip()
+
+    # Cap the frame rate
+    clock.tick(FPS)
+
+# Quit the game
+pygame.quit()
